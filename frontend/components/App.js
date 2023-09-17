@@ -5,6 +5,10 @@ import LoginForm from './LoginForm'
 import Message from './Message'
 import ArticleForm from './ArticleForm'
 import Spinner from './Spinner'
+import axios from "axios";
+import axiosWithAuth from '../axios'
+import PrivateRoute from '../axios/PrivateRoute'
+
 
 const articlesUrl = 'http://localhost:9000/api/articles'
 const loginUrl = 'http://localhost:9000/api/login'
@@ -18,8 +22,8 @@ export default function App() {
 
   // ✨ Research `useNavigate` in React Router v.6
   const navigate = useNavigate()
-  const redirectToLogin = () => { /* ✨ implement */ }
-  const redirectToArticles = () => { /* ✨ implement */ }
+  const redirectToLogin = () => { navigate("/")}
+  const redirectToArticles = () => { navigate("/articles") }
 
   const logout = () => {
     // ✨ implement
@@ -27,6 +31,8 @@ export default function App() {
     // and a message saying "Goodbye!" should be set in its proper state.
     // In any case, we should redirect the browser back to the login screen,
     // using the helper above.
+    localStorage.removeItem("token");
+    redirectToLogin();
   }
 
   const login = ({ username, password }) => {
@@ -36,6 +42,12 @@ export default function App() {
     // On success, we should set the token to local storage in a 'token' key,
     // put the server success message in its proper state, and redirect
     // to the Articles screen. Don't forget to turn off the spinner!
+    axios.post("http://localhost:9000/api/login", {"username": username, "password": password})
+    .then(res => {
+      setMessage(res.data.message);
+      localStorage.setItem("token", res.data.token);
+      redirectToArticles();
+    }).catch(err => console.log(err))
   }
 
   const getArticles = () => {
@@ -69,7 +81,7 @@ export default function App() {
     // ✨ fix the JSX: `Spinner`, `Message`, `LoginForm`, `ArticleForm` and `Articles` expect props ❗
     <>
       <Spinner />
-      <Message />
+      <Message message={message}/>
       <button id="logout" onClick={logout}>Logout from app</button>
       <div id="wrapper" style={{ opacity: spinnerOn ? "0.25" : "1" }}> {/* <-- do not change this line */}
         <h1>Advanced Web Applications</h1>
@@ -78,13 +90,8 @@ export default function App() {
           <NavLink id="articlesScreen" to="/articles">Articles</NavLink>
         </nav>
         <Routes>
-          <Route path="/" element={<LoginForm />} />
-          <Route path="articles" element={
-            <>
-              <ArticleForm />
-              <Articles />
-            </>
-          } />
+          <Route path="/" element={<LoginForm login={login}/>} />
+          <Route path="articles" element={<PrivateRoute><ArticleForm /><Articles /></PrivateRoute>}/>
         </Routes>
         <footer>Bloom Institute of Technology 2022</footer>
       </div>
