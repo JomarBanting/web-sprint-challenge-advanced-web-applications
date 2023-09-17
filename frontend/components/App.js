@@ -8,6 +8,7 @@ import Spinner from './Spinner'
 import axios from "axios";
 import axiosWithAuth from '../axios'
 import PrivateRoute from '../axios/PrivateRoute'
+import { render } from '@testing-library/react'
 
 
 const articlesUrl = 'http://localhost:9000/api/articles'
@@ -32,6 +33,7 @@ export default function App() {
     // In any case, we should redirect the browser back to the login screen,
     // using the helper above.
     localStorage.removeItem("token");
+    setMessage("Goodbye!")
     redirectToLogin();
   }
 
@@ -42,11 +44,13 @@ export default function App() {
     // On success, we should set the token to local storage in a 'token' key,
     // put the server success message in its proper state, and redirect
     // to the Articles screen. Don't forget to turn off the spinner!
+    setSpinnerOn(true);
     axios.post("http://localhost:9000/api/login", {"username": username, "password": password})
     .then(res => {
       setMessage(res.data.message);
-      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("token", res.data.token)
       redirectToArticles();
+      setSpinnerOn(false)
     }).catch(err => console.log(err))
   }
 
@@ -80,7 +84,7 @@ export default function App() {
   return (
     // ✨ fix the JSX: `Spinner`, `Message`, `LoginForm`, `ArticleForm` and `Articles` expect props ❗
     <>
-      <Spinner />
+      <Spinner on={spinnerOn}/>
       <Message message={message}/>
       <button id="logout" onClick={logout}>Logout from app</button>
       <div id="wrapper" style={{ opacity: spinnerOn ? "0.25" : "1" }}> {/* <-- do not change this line */}
