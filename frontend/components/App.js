@@ -49,8 +49,7 @@ export default function App() {
     .then(res => {
       setMessage(res.data.message);
       localStorage.setItem("token", res.data.token)
-      redirectToArticles();
-      setSpinnerOn(false)
+      getArticles();
     }).catch(err => console.log(err))
   }
 
@@ -63,6 +62,13 @@ export default function App() {
     // If something goes wrong, check the status of the response:
     // if it's a 401 the token might have gone bad, and we should redirect to login.
     // Don't forget to turn off the spinner!
+    setSpinnerOn(true);
+    axiosWithAuth().get("articles").then(res => {
+      setArticles(res.data.articles)
+      setMessage(res.data.message)
+      redirectToArticles();
+      setSpinnerOn(false)
+    }).catch(err => console.log(err))
   }
 
   const postArticle = article => {
@@ -95,7 +101,7 @@ export default function App() {
         </nav>
         <Routes>
           <Route path="/" element={<LoginForm login={login}/>} />
-          <Route path="articles" element={<PrivateRoute><ArticleForm /><Articles /></PrivateRoute>}/>
+          <Route path="articles" element={<PrivateRoute><ArticleForm /><Articles articles={articles}/></PrivateRoute>}/>
         </Routes>
         <footer>Bloom Institute of Technology 2022</footer>
       </div>

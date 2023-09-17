@@ -5,5 +5,9 @@ import { render } from "@testing-library/react"
 import React from "react";
 
 test("Spinner renders correctly", () => {
-render(<Spinner/>)
+render(<Spinner on={true}/>)
+})
+
+test('sanity', () => {
+  expect(true).toBe(true)
 })
